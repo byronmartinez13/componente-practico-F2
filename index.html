@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Fuerza en Triángulo Equilátero</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <h1>Triángulo Equilátero con Cargas</h1>
+<div id="descripcion" style="background:#e3f2fd; padding:10px; border-radius:6px; margin-bottom:15px; color:#0d47a1; font-size:16px;">
+  El siguiente programa está diseñado para al ingresar 3 cargas y la distancia entre estas:<br><br>
+  • Calcular la fuerza que ejerce la carga 1 sobre la carga 3.<br>
+  • Calcular la fuerza que ejerce la carga 2 sobre la carga 3.<br>
+  • Calcular la descomposición de las fuerzas en el eje X.<br>
+  • Calcular la descomposición de las fuerzas en el eje Y.<br>
+  • Calcular la fuerza total ejercida sobre la carga 3.<br>
+  • Calcular el ángulo resultante de la fuerza total.<br>
+</div>
+
+  <form id="form">
+    <div class="inputs">
+      <div class="tarjeta">
+        <h3>Carga 1</h3>
+        <label>Valor (q1): <input type="number" id="q1" step="any" required /></label>
+        <label>Unidad:
+          <select id="u1">
+            <option value="1">C</option>
+            <option value="0.001">mC</option>
+            <option value="0.000001">μC</option>
+            <option value="0.000000001">nC</option>
+          </select>
+        </label>
+      </div>
+      <div class="tarjeta">
+        <h3>Carga 2</h3>
+        <label>Valor (q2): <input type="number" id="q2" step="any" required /></label>
+        <label>Unidad:
+          <select id="u2">
+            <option value="1">C</option>
+            <option value="0.001">mC</option>
+            <option value="0.000001">μC</option>
+            <option value="0.000000001">nC</option>
+          </select>
+        </label>
+      </div>
+      <div class="tarjeta">
+        <h3>Carga 3 (afectada)</h3>
+        <label>Valor (q3): <input type="number" id="q3" step="any" required /></label>
+        <label>Unidad:
+          <select id="u3">
+            <option value="1">C</option>
+            <option value="0.001">mC</option>
+            <option value="0.000001">μC</option>
+            <option value="0.000000001">nC</option>
+          </select>
+        </label>
+      </div>
+    </div>
+
+    <label>Distancia entre cargas (m):
+      <input type="number" id="lado" step="any" required />
+    </label>
+
+    <button type="submit">Calcular</button>
+  </form>
+
+  <div id="resultado"></div>
+  <canvas id="grafico" width="500" height="500"></canvas>
+
+  <script src="funcion.js"></script>
+</body>
+</html>
+

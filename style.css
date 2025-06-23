@@ -1,0 +1,63 @@
+body {
+  font-family: sans-serif;
+  padding: 20px;
+  background: #f0f0f0;
+}
+
+h1 {
+  text-align: center;
+}
+
+form {
+  background: #fff;
+  padding: 15px;
+  border-radius: 8px;
+  box-shadow: 0 0 10px #aaa;
+  max-width: 800px;
+  margin: auto;
+}
+
+.inputs {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-around;
+}
+
+.tarjeta {
+  background: #e8f4ff;
+  padding: 10px;
+  border-radius: 10px;
+  width: 230px;
+  margin: 10px;
+  box-shadow: 0 0 5px #bbb;
+}
+
+label {
+  display: block;
+  margin-bottom: 8px;
+}
+
+input, select {
+  margin-top: 4px;
+  width: 100%;
+}
+
+button {
+  display: block;
+  margin: 20px auto;
+  padding: 10px 25px;
+  font-size: 16px;
+}
+
+#resultado {
+  text-align: center;
+  margin-top: 20px;
+  font-size: 1.2em;
+}
+
+canvas {
+  display: block;
+  margin: 20px auto;
+  border: 1px solid black;
+}
+
