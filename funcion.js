@@ -1,32 +1,25 @@
 document.getElementById("form").addEventListener("submit", function (e) {
   e.preventDefault();
 
-  const k = 8.99e9;
+  const k = 8.99e9; 
 
   function val(id) {
     return parseFloat(document.getElementById(id).value);
   }
 
-  // Valores originales ingresados por el usuario
-  const q1val = val("q1");
-  const q2val = val("q2");
-  const q3val = val("q3");
+  const q1val = val("q1"), q2val = val("q2"), q3val = val("q3");
+  const u1 = val("u1"), u2 = val("u2"), u3 = val("u3");
+  const q1 = q1val * u1, q2 = q2val * u2, q3 = q3val * u3;
+  const d12 = val("d12"), d13 = val("d13"), d23 = val("d23");
 
-  // Unidades seleccionadas en texto
-  const u1text = document.getElementById("u1").options[document.getElementById("u1").selectedIndex].text;
-  const u2text = document.getElementById("u2").options[document.getElementById("u2").selectedIndex].text;
-  const u3text = document.getElementById("u3").options[document.getElementById("u3").selectedIndex].text;
-
-  // Conversiones a Coulomb
-  const q1 = q1val * val("u1");
-  const q2 = q2val * val("u2");
-  const q3 = q3val * val("u3");
-  const L = val("lado");
-
-  // Coordenadas del triángulo equilátero
   const x1 = 0, y1 = 0;
-  const x2 = L, y2 = 0;
-  const x3 = L / 2, y3 = (Math.sqrt(3) / 2) * L;
+  const x2 = d12, y2 = 0;
+  const x3 = (d12 ** 2 + d13 ** 2 - d23 ** 2) / (2 * d12);
+  const y3 = Math.sqrt(Math.max(0, d13 ** 2 - x3 ** 2));
+
+  const ang1 = Math.acos((d12 ** 2 + d13 ** 2 - d23 ** 2) / (2 * d12 * d13)) * 180 / Math.PI;
+  const ang2 = Math.acos((d12 ** 2 + d23 ** 2 - d13 ** 2) / (2 * d12 * d23)) * 180 / Math.PI;
+  const ang3 = 180 - ang1 - ang2;
 
   function calcF(qi, xi, yi) {
     const dx = xi - x3;
@@ -41,155 +34,175 @@ document.getElementById("form").addEventListener("submit", function (e) {
 
   const f13 = calcF(q1, x1, y1);
   const f23 = calcF(q2, x2, y2);
-
   const fxTotal = f13.fx + f23.fx;
   const fyTotal = f13.fy + f23.fy;
   const Ft = Math.sqrt(fxTotal ** 2 + fyTotal ** 2);
-  let angulo = Math.atan2(fyTotal, fxTotal) * (180 / Math.PI);
+  let angulo = Math.atan2(fyTotal, fxTotal) * 180 / Math.PI;
   if (angulo < 0) angulo += 360;
-
-  function r2(x) {
-    return Math.round(x * 100) / 100;
-  }
-
-  document.getElementById("resultado").innerHTML = `
-    <strong>Resultados:</strong><br><br>
-    🔴 <strong>Fuerza que ejerce la carga 1 sobre la carga 3:</strong> ${r2(f13.F)} N<br>
-    ➤ Fx₁₃ = ${r2(f13.fx)} N<br>
-    ➤ Fy₁₃ = ${r2(f13.fy)} N<br><br>
-    🔵 <strong>Fuerza que ejerce la carga 2 sobre la carga 3:</strong> ${r2(f23.F)} N<br>
-    ➤ Fx₂₃ = ${r2(f23.fx)} N<br>
-    ➤ Fy₂₃ = ${r2(f23.fy)} N<br><br>
-    🟢 <strong>Fuerza total sobre la carga 3:</strong> ${r2(Ft)} N<br>
-    ➤ Fx = ${r2(fxTotal)} N<br>
-    ➤ Fy = ${r2(fyTotal)} N<br>
-    ➤ Ángulo = ${r2(angulo)}°
-  `;
 
   const canvas = document.getElementById("grafico");
   const ctx = canvas.getContext("2d");
   ctx.clearRect(0, 0, canvas.width, canvas.height);
-  const cx = canvas.width / 2;
-  const cy = canvas.height / 2;
-  const scale = 220;
+  ctx.font = "12px Arial";
+  ctx.textAlign = "center";
+  ctx.textBaseline = "middle";
 
-  function plano() {
-    ctx.strokeStyle = "#ccc";
-    for (let i = 0; i <= canvas.width; i += 20) {
-      ctx.beginPath();
-      ctx.moveTo(i, 0);
-      ctx.lineTo(i, canvas.height);
-      ctx.stroke();
-    }
-    for (let i = 0; i <= canvas.height; i += 20) {
-      ctx.beginPath();
-      ctx.moveTo(0, i);
-      ctx.lineTo(canvas.width, i);
-      ctx.stroke();
-    }
+  function drawTextWithBackground(text, x, y, color = "#000", bgColor = "rgba(255,255,255,0.7)") {
+    const padding = 4;
+    const metrics = ctx.measureText(text);
+    const width = metrics.width + padding * 2;
+    const height = 18;
+    ctx.fillStyle = bgColor;
+    ctx.fillRect(x - width / 2, y - height / 2, width, height);
+    ctx.fillStyle = color;
+    ctx.fillText(text, x, y);
+  }
 
-    ctx.strokeStyle = "#000";
+  function dibujarTriangulo(a, b, c, color) {
+    ctx.strokeStyle = color;
+    ctx.lineWidth = 2;
     ctx.beginPath();
-    ctx.moveTo(0, cy);
-    ctx.lineTo(canvas.width, cy);
-    ctx.stroke();
-
-    ctx.beginPath();
-    ctx.moveTo(cx, 0);
-    ctx.lineTo(cx, canvas.height);
+    ctx.moveTo(...a);
+    ctx.lineTo(...b);
+    ctx.lineTo(...c);
+    ctx.closePath();
     ctx.stroke();
   }
 
-  function dibujarCarga(x, y, color, label, valorConvertido, valorOriginal, unidadOriginal) {
+  function dibujarCarga(x, y, color, label, valor, unidad) {
     ctx.beginPath();
     ctx.arc(x, y, 15, 0, 2 * Math.PI);
     ctx.fillStyle = color;
     ctx.fill();
     ctx.strokeStyle = "#000";
     ctx.stroke();
-
-    // Signo dentro del círculo
     ctx.fillStyle = "#fff";
     ctx.font = "bold 16px Arial";
-    ctx.textAlign = "center";
-    ctx.textBaseline = "middle";
-    ctx.fillText(valorOriginal >= 0 ? "+" : "–", x, y);
-
-    // Etiqueta q1, q2, q3
-    ctx.fillStyle = "#000";
-    ctx.font = "14px Arial";
-    ctx.textAlign = "left";
-    ctx.fillText(label, x + 18, y - 12);
-
-    // Valor original + unidad
+    ctx.fillText(valor >= 0 ? "+" : "–", x, y);
+    ctx.fillStyle = color;
+    ctx.fillText(label, x, y - 25);
+    ctx.fillStyle = "#333";
     ctx.font = "12px Arial";
-    ctx.fillText(`${valorOriginal >= 0 ? "+" : "-"}${Math.abs(valorOriginal)} ${unidadOriginal}`, x + 18, y + 6);
+    ctx.fillText(`${valor} ${unidad}`, x, y + 25);
   }
 
-  function dibujarVector(xo, yo, fx, fy, color, label) {
+  function dibujarVector(x, y, fx, fy, color, label) {
+    const esc = 0.5e7;
+    const dx = fx * esc, dy = -fy * esc;
     ctx.beginPath();
-    ctx.moveTo(xo, yo);
-    ctx.lineTo(xo + fx * 1e7, yo - fy * 1e7);
+    ctx.moveTo(x, y);
+    ctx.lineTo(x + dx, y + dy);
     ctx.strokeStyle = color;
     ctx.lineWidth = 2;
     ctx.stroke();
-    if (label) {
-      ctx.fillStyle = color;
-      ctx.fillText(label, xo + fx * 1e7 + 5, yo - fy * 1e7 - 5);
-    }
-  }
-
-  function dibujarTriangulo(a, b, c, color) {
-    ctx.strokeStyle = color;
-    ctx.lineWidth = 1;
+    const angle = Math.atan2(dy, dx);
+    const arrow = 10;
     ctx.beginPath();
-    ctx.moveTo(a[0], a[1]);
-    ctx.lineTo(b[0], b[1]);
-    ctx.lineTo(c[0], c[1]);
-    ctx.lineTo(a[0], a[1]);
+    ctx.moveTo(x + dx, y + dy);
+    ctx.lineTo(x + dx - arrow * Math.cos(angle - Math.PI / 6), y + dy - arrow * Math.sin(angle - Math.PI / 6));
+    ctx.lineTo(x + dx - arrow * Math.cos(angle + Math.PI / 6), y + dy - arrow * Math.sin(angle + Math.PI / 6));
     ctx.stroke();
+    if (label) drawTextWithBackground(label, x + dx / 2, y + dy / 2 - 10, color);
   }
 
-  plano();
+function dibujarAngulo(x, y, angulo, radio, color) {
+  // Determinar el ángulo inicial según el vértice
+  // Esto intenta "mirar" hacia el centro del triángulo (asumido en medio)
+  const centroX = (x1p + x2p + x3p) / 3;
+  const centroY = (y1p + y2p + y3p) / 3;
+  const dx = centroX - x;
+  const dy = centroY - y;
+  const startAngle = Math.atan2(dy, dx);
+  const endAngle = startAngle + angulo * Math.PI / 180;
 
-  const x1p = cx + x1 * scale, y1p = cy - y1 * scale;
-  const x2p = cx + x2 * scale, y2p = cy - y2 * scale;
-  const x3p = cx + x3 * scale, y3p = cy - y3 * scale;
+  // Dibujar arco
+  ctx.beginPath();
+  ctx.arc(x, y, radio, startAngle, endAngle);
+  ctx.strokeStyle = color;
+  ctx.lineWidth = 1;
+  ctx.stroke();
 
-  dibujarTriangulo([x1p, y1p], [x2p, y2p], [x3p, y3p], "#888");
+  // Posicionar el texto
+  const labelAngle = (startAngle + endAngle) / 2;
+  const labelX = x + (radio + 12) * Math.cos(labelAngle);
+  const labelY = y + (radio + 12) * Math.sin(labelAngle);
+  drawTextWithBackground(`${Math.round(angulo)}°`, labelX, labelY, color);
+}
 
-  // Dibujo de cargas con valor original y unidad
-  dibujarCarga(x1p, y1p, "red", "q1", q1, q1val, u1text);
-  dibujarCarga(x2p, y2p, "blue", "q2", q2, q2val, u2text);
-  dibujarCarga(x3p, y3p, "green", "q3", q3, q3val, u3text);
 
-  // Vectores principales
-  dibujarVector(x3p, y3p, f13.fx, f13.fy, "orange", "F₁₃");
-  dibujarVector(x3p, y3p, f23.fx, f23.fy, "purple", "F₂₃");
+  function dibujarDistancia(x1, y1, x2, y2, distancia) {
+    const mx = (x1 + x2) / 2;
+    const my = (y1 + y2) / 2;
+    const angle = Math.atan2(y2 - y1, x2 - x1) + Math.PI / 2;
+    const offset = 15;
+    const tx = mx + offset * Math.cos(angle);
+    const ty = my + offset * Math.sin(angle);
+    ctx.beginPath();
+    ctx.moveTo(mx, my);
+    ctx.lineTo(tx, ty);
+    ctx.strokeStyle = "#888";
+    ctx.lineWidth = 0.5;
+    ctx.stroke();
+    drawTextWithBackground(`${distancia} m`, tx, ty, "#333");
+  }
 
-  // TRIÁNGULOS DE DESCOMPOSICIÓN
-
-  const fx13px = f13.fx * 1e7;
-  const fy13py = -f13.fy * 1e7;
-  dibujarTriangulo(
-    [x3p, y3p],
-    [x3p + fx13px, y3p],
-    [x3p + fx13px, y3p + fy13py],
-    "#aaf"
+  const padding = 60;
+  const maxX = Math.max(x1, x2, x3);
+  const maxY = Math.max(y1, y2, y3);
+  const scale = Math.min(
+    (canvas.width - padding * 2) / maxX,
+    (canvas.height - padding * 2) / maxY
   );
-  dibujarVector(x3p, y3p, f13.fx, 0, "blue", "F₁₃ₓ");
-  dibujarVector(x3p + fx13px, y3p, 0, f13.fy, "red", "F₁₃ᵧ");
 
-  const fx23px = f23.fx * 1e7;
-  const fy23py = -f23.fy * 1e7;
-  dibujarTriangulo(
-    [x3p, y3p],
-    [x3p + fx23px, y3p],
-    [x3p + fx23px, y3p + fy23py],
-    "#aaf"
-  );
-  dibujarVector(x3p, y3p, f23.fx, 0, "blue", "F₂₃ₓ");
-  dibujarVector(x3p + fx23px, y3p, 0, f23.fy, "red", "F₂₃ᵧ");
+  const x1p = padding + x1 * scale,
+        y1p = canvas.height - padding - y1 * scale;
+  const x2p = padding + x2 * scale,
+        y2p = canvas.height - padding - y2 * scale;
+  const x3p = padding + x3 * scale,
+        y3p = canvas.height - padding - y3 * scale;
+
+  dibujarTriangulo([x1p, y1p], [x2p, y2p], [x3p, y3p], "#555");
+  dibujarCarga(x1p, y1p, "red", "q₁", q1val, document.getElementById("u1").options[document.getElementById("u1").selectedIndex].text);
+  dibujarCarga(x2p, y2p, "blue", "q₂", q2val, document.getElementById("u2").options[document.getElementById("u2").selectedIndex].text);
+  dibujarCarga(x3p, y3p, "green", "q₃", q3val, document.getElementById("u3").options[document.getElementById("u3").selectedIndex].text);
+  dibujarVector(x3p, y3p, f13.fx, f13.fy, "#FF5722", "F₁₃");
+  dibujarVector(x3p, y3p, f23.fx, f23.fy, "#3F51B5", "F₂₃");
+ctx.globalAlpha = 0.6;
+
+// F13: descomposición como triángulo
+const xFx13 = x3p + f13.fx * 0.5e7;
+const yFx13 = y3p;
+dibujarVector(x3p, y3p, f13.fx, 0, "#E91E63", "F₁₃ₓ");
+dibujarVector(xFx13, yFx13, 0, f13.fy, "#4CAF50", "F₁₃ᵧ");
+
+// F23: descomposición como triángulo
+const xFx23 = x3p + f23.fx * 0.5e7;
+const yFx23 = y3p;
+dibujarVector(x3p, y3p, f23.fx, 0, "#E91E63", "F₂₃ₓ");
+dibujarVector(xFx23, yFx23, 0, f23.fy, "#4CAF50", "F₂₃ᵧ");
+
+ctx.globalAlpha = 1.0;
+  //dibujarVector(x3p, y3p, fxTotal, fyTotal, "#FFC107", "Fₜ");
+  dibujarDistancia(x1p, y1p, x2p, y2p, d12);
+  dibujarDistancia(x1p, y1p, x3p, y3p, d13);
+  dibujarDistancia(x2p, y2p, x3p, y3p, d23);
+  dibujarAngulo(x1p, y1p, ang1, 30, "red");
+  dibujarAngulo(x2p, y2p, ang2, 30, "blue");
+  dibujarAngulo(x3p, y3p, ang3, 30, "green");
+
+  document.getElementById("resultado").innerHTML = `
+    <strong>Resultados:</strong><br><br>
+    🔴 <strong>Fuerza que ejerce la carga 1 sobre la carga 3:</strong> ${Ft ? f13.F.toFixed(2) : 0} N<br>
+    ➤ Fx₁₃ = ${f13.fx.toFixed(2)} N<br>
+    ➤ Fy₁₃ = ${f13.fy.toFixed(2)} N<br><br>
+    🔵 <strong>Fuerza que ejerce la carga 2 sobre la carga 3:</strong> ${Ft ? f23.F.toFixed(2) : 0} N<br>
+    ➤ Fx₂₃ = ${f23.fx.toFixed(2)} N<br>
+    ➤ Fy₂₃ = ${f23.fy.toFixed(2)} N<br><br>
+    🟢 <strong>Fuerza total sobre la carga 3:</strong> ${Ft.toFixed(2)} N<br>
+    ➤ Fx = ${fxTotal.toFixed(2)} N<br>
+    ➤ Fy = ${fyTotal.toFixed(2)} N<br>
+    ➤ Ángulo resultante = ${angulo.toFixed(2)}°<br>
+  `;
 });
 
 

@@ -3,20 +3,20 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Fuerza en Triángulo Equilátero</title>
+  <title>Fuerza en Triángulo General</title>
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <h1>Triángulo Equilátero con Cargas</h1>
-<div id="descripcion" style="background:#e3f2fd; padding:10px; border-radius:6px; margin-bottom:15px; color:#0d47a1; font-size:16px;">
-  El siguiente programa está diseñado para al ingresar 3 cargas y la distancia entre estas:<br><br>
-  • Calcular la fuerza que ejerce la carga 1 sobre la carga 3.<br>
-  • Calcular la fuerza que ejerce la carga 2 sobre la carga 3.<br>
-  • Calcular la descomposición de las fuerzas en el eje X.<br>
-  • Calcular la descomposición de las fuerzas en el eje Y.<br>
-  • Calcular la fuerza total ejercida sobre la carga 3.<br>
-  • Calcular el ángulo resultante de la fuerza total.<br>
-</div>
+  <h1>Fuerzas en Configuración Triangular</h1>
+  <div id="descripcion" style="background:#e3f2fd; padding:10px; border-radius:6px; margin-bottom:15px; color:#0d47a1; font-size:16px;">
+    El siguiente programa está diseñado para al ingresar 3 cargas y las distancias entre ellas:<br><br>
+    • Calcular la fuerza que ejerce la carga 1 sobre la carga 3.<br>
+    • Calcular la fuerza que ejerce la carga 2 sobre la carga 3.<br>
+    • Calcular la descomposición de las fuerzas en el eje X.<br>
+    • Calcular la descomposición de las fuerzas en el eje Y.<br>
+    • Calcular la fuerza total ejercida sobre la carga 3.<br>
+    • Calcular el ángulo resultante de la fuerza total.<br>
+  </div>
 
   <form id="form">
     <div class="inputs">
@@ -58,9 +58,14 @@
       </div>
     </div>
 
-    <label>Distancia entre cargas (m):
-      <input type="number" id="lado" step="any" required />
-    </label>
+    <div class="distances">
+      <h3>Distancias entre cargas</h3>
+      <label>Distancia q1 a q3 (m): <input type="number" id="d13" step="any" required /></label>
+      <label>Distancia q2 a q3 (m): <input type="number" id="d23" step="any" required /></label>
+      <label>Distancia q1 a q2 (m): <input type="number" id="d12" step="any" required /></label>
+    </div>
+
+    <!-- Se eliminó la sección de ángulos -->
 
     <button type="submit">Calcular</button>
   </form>
@@ -71,4 +76,5 @@
   <script src="funcion.js"></script>
 </body>
 </html>
+
 
